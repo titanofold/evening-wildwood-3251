@@ -4,6 +4,149 @@ use Mojolicious::Lite;
 # Documentation browser under "/perldoc"
 # plugin 'PODRenderer';
 
+my @ores = qw(Veldspar
+Concentrated Veldspar
+Dense Veldspar
+Scordite
+Condensed Scordite
+Massive Scordite
+Pyroxeres
+Solid Pyroxeres
+Viscous Pyroxeres
+Plagioclase
+Azure Plagioclase
+Rich Plagioclase
+Omber
+Silvery Omber
+Golden Omber
+Kernite
+Luminous Kernite
+Fiery Kernite
+Jaspet
+Pure Jaspet
+Pristine Jaspet
+Hemorphite
+Vivid Hemorphite
+Radiant Hemorphite
+Hedbergite
+Vitric Hedbergite
+Glazed Hedbergite
+Gneiss
+Iridescent Gneiss
+Prismatic Gneiss
+Dark Ochre
+Onyx Ochre
+Obsidian Ochre
+Crokite
+Sharp Crokite
+Crystalline Crokite
+Spodumain
+Bright Spodumain
+Gleaming Spodumain
+Bistot
+Triclinic Bistot
+Monoclinic Bistot
+Arkonor
+Crimson Arkonor
+Prime Arkonor
+Mercoxit
+Magma Mercoxit
+Vitreous Mercoxit
+Blue Ice
+Clear Icicle
+Dark Glitter
+Enriched Clear Icicle
+Gelidus
+Glacial Mass
+Glare Crust
+Krystallos
+Pristine White Glaze
+Smooth Glacial Mass
+Thick Blue Ice
+White Glaze);
+
+my @unit_volumes = qw(0.1
+0.1
+0.1
+0.15
+0.15
+0.15
+0.3
+0.3
+0.3
+0.35
+0.35
+0.35
+0.6
+0.6
+0.6
+1.2
+1.2
+1.2
+2
+2
+2
+3
+3
+3
+3
+3
+3
+5
+5
+5
+8
+8
+8
+16
+16
+16
+16
+16
+16
+16
+16
+16
+16
+16
+16
+40
+40
+40
+1000
+1000
+1000
+1000
+1000
+1000
+1000
+1000
+1000
+1000
+1000
+1000);
+
+my %ore_unit_volume;
+
+for (my $i = 0; $i < $#ores; $i++) {
+  $ore_unit_volume{$ores[$i]} = $unit_volumes[$i];
+}
+
+sub add_pilot {
+  my $pilot = shift;
+  my $role = shift;
+  return 0 unless $role =~ /^orca|rorqual|miner|hauler$/i;
+  return 1;
+}
+
+sub add_harvest {
+
+}
+
+sub add_expense {}
+
+sub add_income {}
+
 get '/' => sub {
   my $self = shift;
   $self->render('index');
