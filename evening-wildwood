@@ -2,11 +2,35 @@
 use Mojolicious::Lite;
 
 # Documentation browser under "/perldoc"
-plugin 'PODRenderer';
+# plugin 'PODRenderer';
 
 get '/' => sub {
   my $self = shift;
   $self->render('index');
+};
+
+websocket '/api/v1' => sub {
+  my $self = shift;
+
+  # Opened
+  $self->app->log->debug('WebSocket opened.');
+
+  $self->on(json => sub {
+	      my ($self, $json) = @_;
+	      my $res;
+
+	      if ($json->{test}) {
+		$res = {code => 200};
+	      }
+
+	      $self->send({json => $res});
+	    });
+
+  # Closed
+  $self->on(finish => sub {
+    my ($self, $code, $reason) = @_;
+    $self->app->log->debug("WebSocket closed with status $code.");
+  });
 };
 
 app->start;
