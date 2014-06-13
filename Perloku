@@ -1,0 +1,2 @@
+#!/bin/sh
+./evening-wildwood daemon --listen http://*:$PORT --mode production
