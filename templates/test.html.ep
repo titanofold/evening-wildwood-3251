@@ -1,3 +1,5 @@
+% layout 'default';
+% title 'Test Page';
 <dl>
 % for my $h (keys %{$headers->{headers}}) {
 <dt><%= $h %></dt>
