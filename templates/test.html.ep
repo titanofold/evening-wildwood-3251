@@ -1,0 +1,12 @@
+<dl>
+% for my $h (keys %{$headers->{headers}}) {
+<dt><%= $h %></dt>
+% for my $v (@{$headers->{headers}->{$h}}) {
+<dd><%= $v->[-1] %></dd>
+% }
+% }
+</dl>
+
+<script>
+CCPEVE.requestTrust('http://localhost:3000/test')
+</script>
