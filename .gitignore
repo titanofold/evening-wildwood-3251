@@ -1,0 +1,3 @@
+# Convenience script that consists of an 'export DATABASE_URL' line
+# and using morbo to start a local instance.
+start-local.sh
