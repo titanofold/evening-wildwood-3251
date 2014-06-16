@@ -1,5 +1,7 @@
 A mining foreman's best friend.
 
+The web application helps EVE Online pilots stay organized.
+
 Requirements
 ============
 
