@@ -1,5 +1,11 @@
 #!/usr/bin/env perl
 use Mojolicious::Lite;
+use DBIx::Connector;
+
+my $conn
+  = DBIx::Connector->new("dbi:Pg:$ENV{DATABASE_URL}", '', '',
+  {AutoCommit => 0})
+  or die;
 
 # Documentation browser under "/perldoc"
 # plugin 'PODRenderer';
