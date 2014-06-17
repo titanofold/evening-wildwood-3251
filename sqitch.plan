@@ -3,3 +3,4 @@
 %uri=https://github.com/titanofold/evening-wildwood-3251
 
 appschema 2014-06-16T10:10:37Z Aaron W. Swenson <aaron.w.swenson@gmail.com> # Add schema for all evening-wildwood objects.
+harvestable_types [appschema] 2014-06-17T11:05:17Z Aaron W. Swenson <aaron.w.swenson@gmail.com> # Creates a table that contains metadata about harvestable items
