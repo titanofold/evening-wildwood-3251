@@ -90,4 +90,6 @@ INSERT INTO ew.harvestable_types VALUES
 	('30377', 'Fullerite-C320', 5),
 	('30378', 'Fullerite-C540', 10);
 
+COMMENT ON TABLE ew.harvestable_types IS 'Data ported from CCP/EVE Kronos 1.0 databse';
+
 COMMIT;
