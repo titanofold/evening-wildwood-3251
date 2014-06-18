@@ -2,7 +2,7 @@
 
 BEGIN;
 
-SELECT harvest_type, unit_volume
+SELECT id, name, volume
   FROM ew.harvestable_types
  WHERE FALSE;
 

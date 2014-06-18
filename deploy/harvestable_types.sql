@@ -6,8 +6,9 @@ BEGIN;
 SET client_min_messages = 'warning';
 
 CREATE TABLE ew.harvestable_types (
-       harvest_type TEXT PRIMARY KEY NOT NULL,
-       unit_volume  DECIMAL NOT NULL
+       id     CHARACTER VARYING(5) PRIMARY KEY NOT NULL,
+       name   TEXT 		   UNIQUE NOT NULL,
+       volume NUMERIC 		   NOT NULL
 );
 
 COMMIT;
