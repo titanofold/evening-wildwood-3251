@@ -6,3 +6,5 @@ appschema 2014-06-16T10:10:37Z Aaron W. Swenson <aaron.w.swenson@gmail.com> # Ad
 harvestable_types [appschema] 2014-06-17T11:05:17Z Aaron W. Swenson <aaron.w.swenson@gmail.com> # Creates a table that contains metadata about harvestable items
 harvestable_types_data [harvestable_types] 2014-06-18T11:48:51Z Aaron W. Swenson <aaron.w.swenson@gmail.com># Data ported from EVE Kronos 1.0 database
 pilots [appschema] 2014-06-19T10:16:46Z Aaron W. Swenson <aaron.w.swenson@gmail.com> # Create pilots table
+ops [appschema pilots] 2014-06-19T10:28:52Z Aaron W. Swenson <aaron.w.swenson@gmail.com> # Create ops table
+op_participants [ops pilots] 2014-06-19T10:50:43Z Aaron W. Swenson <aaron.w.swenson@gmail.com> # Create op_participants table
