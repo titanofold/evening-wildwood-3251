@@ -6,6 +6,7 @@ my $conn
   = DBIx::Connector->new("dbi:Pg:$ENV{DATABASE_URL}", '', '',
   {AutoCommit => 0})
   or die;
+$conn->mode('fixup');
 
 # Documentation browser under "/perldoc"
 # plugin 'PODRenderer';
@@ -36,17 +37,37 @@ get '/test' => sub {
   $self->render;
 };
 
+get '/op' => sub {
+  my $self = shift;
+  $self->render('op');
+};
+
+under '/op/:op' => [op => qr/\d+/] => sub {
+  my $self = shift;
+  my $op   = $self->param('op');
+
+#$conn->run(sub{$_->selectrow_array('SELECT COUNT(id) FROM ew.ops WHERE id = ?;')});
+};
+
+get '/' => sub {
+  my $self = shift;
+  my $op   = $self->param('op');
+  $self->render('op');
+};
+
+get '/join' => sub {
+  my $self = shift;
+  $self->redirect_to('/');
+};
+
+get '/finish' => sub {
+  my $self = shift;
+  $self->redirect_to('/');
+};
+
+post '/update' => sub {
+  my $self = shift;
+  $self->render('update');
+};
+
 app->start;
-__DATA__
-
-@@ index.html.ep
-% layout 'default';
-% title 'Welcome';
-Welcome to the Mojolicious real-time web framework!
-
-@@ layouts/default.html.ep
-<!DOCTYPE html>
-<html>
-  <head><title><%= title %></title></head>
-  <body><%= content %></body>
-</html>
