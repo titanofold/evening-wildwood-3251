@@ -1,4 +1,5 @@
-@import url(http://fonts.googleapis.com/css?family=Cardo|Inconsolata&subset=latin,greek-ext,greek,latin-ext);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,700|Inconsolata&subset=latin,cyrillic,cyrillic-ext,greek-ext,greek,vietnamese,latin-ext);
+
 /* http://meyerweb.com/eric/tools/css/reset/ 
    v2.0 | 20110126
    License: none (public domain)
@@ -24,7 +25,7 @@ time, mark, audio, video {
     background-color: #002b36;
     font-size: 100%;
     font: inherit;
-    font-family: 'Cardo', serif;
+    font-family: 'Open Sans', serif;
     vertical-align: baseline;
 }
 
@@ -34,28 +35,41 @@ footer, header, hgroup, menu, nav, section {
     display: block;
 }
 
+html, body {overflow:auto}
 body {
-    margin: 1rem;
-    line-height: 1;
+    padding: 1rem;
+    line-height: 1.4rem;
+
 }
 
+p {margin-bottom:1rem}
 strong, em {color:#93a1a1}
 
 footer {color:#586e75}
 
 h1, h2, h3, h4, h5, h6 {color:#b58900}
-h1 {font-size:2rem}
-h2 {font-size:1.7rem}
-h3 {font-size:1.4rem}
+h1 {
+    font-size:2rem;
+    margin:2rem 0;
+}
+h2 {
+    font-size:1.7rem;
+    line-height:2rem;
+}
+h3 {
+    font-size:1.4rem;
+    line-height:1.8rem;
+}
 
 a {color:#268bd2}
 a:hover {background-color:#073642}
 a:visited {color:#6c71c4}
 
-ol, ul {
-    list-style: none;
-}
+ol, ul {list-style:none}
 li {margin:.1rem 0}
+dt {font-weight:700}
+dd {margin-left:2rem}
+
 
 blockquote, q {
     quotes: none;
