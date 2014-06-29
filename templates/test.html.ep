@@ -3,15 +3,13 @@
 <dl>
 % for my $h (keys %{$headers->{headers}}) {
 <dt><%= $h %></dt>
-% for my $v (@{$headers->{headers}->{$h}}) {
+% for my $v (get_header_value($h)) {
 <dd><%= $v %></dd>
 % }
 % }
 </dl>
 
 <h1>Lorem Ipsum</h1>
-
-<p><%= get_header_value('accept') %></p>
 
 <h2>The standard Lorem Ipsum passage, used since the 1500s</h2>
 
