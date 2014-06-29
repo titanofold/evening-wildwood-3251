@@ -11,6 +11,8 @@
 
 <h1>Lorem Ipsum</h1>
 
+<p><%= get_header_value('accept') %></p>
+
 <h2>The standard Lorem Ipsum passage, used since the 1500s</h2>
 
 <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
