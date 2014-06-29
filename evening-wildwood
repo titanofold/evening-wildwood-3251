@@ -11,6 +11,9 @@ $conn->mode('fixup');
 # Documentation browser under "/perldoc"
 # plugin 'PODRenderer';
 
+helper get_header_value =>
+  sub { return shift->req->headers->{headers}->{$_[0]}->[-1] };
+
 sub add_pilot {
   my $pilot = shift;
   my $role  = shift;

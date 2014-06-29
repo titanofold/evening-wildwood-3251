@@ -1,8 +1,22 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta name="viewport" content="initial-scale=1">
     %= stylesheet 'c.css'
     <title><%= title %></title>
   </head>
-  <body><%= content %></body>
+  <body>
+    <%= content %>
+    <footer>
+      Contribute to this project
+      on <a href="https://github.com/titanofold/evening-wildwood-3251">GitHub</a>.
+    </footer>
+    %= javascript begin
+      var eve_trusted = <%= get_header_value('eve_trusted') ? 'true' : 'false' %>;
+
+      if (eve_trusted && typeof CCPEVE === 'object') {
+
+      }
+    % end
+  </body>
 </html>
