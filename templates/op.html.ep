@@ -9,11 +9,3 @@
 <li><a href="http://google.com">Visited</a></li>
 <li><a href="http://notvisited.com">Not Visited</a></li>
 </ul>
-<footer>Contact me</footer>
-<script>
-if (typeof CCPEVE === 'undefined') {
-alert('Not in EVE')
-}else {
-alert('In EVE')
-}
-</script>
