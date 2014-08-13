@@ -8,6 +8,37 @@ my $conn
   or die;
 $conn->mode('fixup');
 
+helper 'db.foreman_for' => sub {
+  my ($self, $op) = @_;
+  $conn->run(
+    sub {
+      $_->selectcol(q|SELECT foreman FROM ew.ops WHERE id = ?|, undef, $op);
+    }
+  );
+};
+
+# List pilots for the given op. Returns array ref
+helper 'db.pilots_for' => sub {
+  my ($self, $op) = @_;
+  $conn->run(
+    sub {
+      $_->selectcol(q|SELECT pilot_id FROM ew.op_participants WHERE op_id = ?|,
+        undef, $op);
+    }
+  );
+};
+
+# Returns 1 if found, else 0
+helper 'db.op_exists' => sub {
+  my ($self, $op) = @_;
+  $conn->run(
+    sub {
+      $_->selectrow_array(q|SELECT COUNT(*) FROM ew.ops WHERE id = ?|,
+        undef, $op);
+    }
+  );
+};
+
 helper get_header_value => sub { return shift->req->headers->header(shift) };
 
 helper format_number => sub {
@@ -29,15 +60,20 @@ get '/test' => sub {
 };
 
 get '/op';
+get '/op/start' => sub {
+  my $self = shift;
+
+  $conn->txn(
+    sub {
+      $_->do(q|INSERT INTO ops VALUES (?) RETRUNING id|,
+        undef, $self->get_header_value('eve_charid'));
+    }
+  );
+};
 
 under '/op/:op' => [op => qr/\d+/] => sub {
   my $self = shift;
-  $self->redirect_to('/op') unless $conn->run(
-    sub {
-      $_->selectrow_array(q|SELECT COUNT(*) FROM ew.ops WHERE id = ?|,
-        undef, $self->param('op'));
-    }
-  );
+  $self->redirect_to('/op') unless $self->db->op_exists($self->param('op'));
 };
 
 get '/' => sub {
