@@ -1,11 +1,2 @@
 % layout 'default';
 % title 'op dashboard';
-<h1>Mining</h1>
-<h2>Mining</h2>
-<h3>Mining</h3>
-<p>op dashboard</p>
-<ul>
-<li>Item 1</li>
-<li><a href="http://google.com">Visited</a></li>
-<li><a href="http://notvisited.com">Not Visited</a></li>
-</ul>
