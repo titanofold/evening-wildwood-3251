@@ -9,8 +9,15 @@
   <body>
     <%= content %>
     <footer>
-      Contribute to this project
-      on <a href="https://github.com/titanofold/evening-wildwood-3251">GitHub</a>.
+      <p>Evening Wildwood
+      leverages <a href="http://mojolicio.us/">Mojolicious</a>, a next
+      generation web framework for the <a href="http://www.perl.org/">Perl</a>
+      programming language, and is hosted
+      on <a href="https://www.heroku.com/">Heroku</a>.</p>
+
+      <p>Contribute to this project
+      on <a href="https://github.com/titanofold/evening-wildwood-3251">GitHub</a>,
+      and/or donate a bit of ISK to Samwise Dagordae.</p>
     </footer>
     %= javascript begin
       var eve_trusted = <%= get_header_value('eve_trusted') ? 'true' : 'false' %>;
