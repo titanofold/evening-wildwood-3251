@@ -1,0 +1,21 @@
+% my $harvest_pilots = {
+%   'Samwise Dagordae' => {
+%    'Condensed Scordite' => 123456,
+%    'Scordite' => 342132,
+%    'Plagioclase' => 543244
+%   }
+% };
+
+% for my $pilot (sort keys $harvest_pilots) {
+  % my $first = 1;
+  % for my $resource (sort keys $harvest_pilots->{$pilot}) {
+    %= tag tr => begin
+      % if ($first) {
+        %= tag td => (rowspan => scalar keys $harvest_pilots->{$pilot}) => $pilot
+        % $first--;
+      % }
+      %= tag td => $resource
+      %= tag td => format_number($harvest_pilots->{$pilot}->{$resource})
+    % end
+  % }
+% }

@@ -80,10 +80,15 @@ q:before, q:after {
     content: none;
 }
 
+input[type="number"] {text-align:right}
+
 table {
     border-collapse: collapse;
     border-spacing: 0;
 }
+th {background:#073642}
+td, th {padding:.5rem}
+td:last-child {text-align:right}
 
 ::selection {
     background: #FF5E99;

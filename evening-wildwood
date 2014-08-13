@@ -8,25 +8,14 @@ my $conn
   or die;
 $conn->mode('fixup');
 
-# Documentation browser under "/perldoc"
-# plugin 'PODRenderer';
-
 helper get_header_value => sub { return shift->req->headers->header(shift) };
 
-sub add_pilot {
-  my $pilot = shift;
-  my $role  = shift;
-  return 0 unless $role =~ /^orca|rorqual|miner|hauler$/i;
-  return 1;
-}
-
-sub add_harvest {
-
-}
-
-sub add_expense { }
-
-sub add_income { }
+helper format_number => sub {
+  use Number::Format;
+  my ($self, $n) = @_;
+  state $f = Number::Format->new(-thousands_sep => ',', -decimal_point => '.');
+  return $f->format_number($n);
+};
 
 get '/' => sub {
   my $self = shift;
@@ -39,22 +28,22 @@ get '/test' => sub {
   $self->render;
 };
 
-get '/op' => sub {
-  my $self = shift;
-  $self->render('op');
-};
+get '/op';
 
-under '/op/:op' => [op => qr/\d+/] => sub {
-  my $self = shift;
-  my $op   = $self->param('op');
-
-#$conn->run(sub{$_->selectrow_array('SELECT COUNT(id) FROM ew.ops WHERE id = ?;')});
-};
+under '/op/:op' => [op => qr/\d+/];
 
 get '/' => sub {
   my $self = shift;
   my $op   = $self->param('op');
-  $self->render('op');
+  $self->render('op-index');
+};
+
+get '/harvest_table';
+get '/loot_table';
+
+post '/add_harvest' => sub {
+  my $self = shift;
+  $self->redirect_to('/');
 };
 
 get '/join' => sub {
@@ -65,11 +54,6 @@ get '/join' => sub {
 get '/finish' => sub {
   my $self = shift;
   $self->redirect_to('/');
-};
-
-post '/update' => sub {
-  my $self = shift;
-  $self->render('update');
 };
 
 app->start;

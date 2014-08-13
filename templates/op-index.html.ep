@@ -1,0 +1,36 @@
+% layout 'default';
+% my $foreman = 'Samwise Dagordae';
+% my $pilots = [{name => 'Samwise Dagordae', id => 12341234}];
+<header>
+<h1>Mining Operation #<%= $op %></h1>
+<p>Started: <time datetime="">2014-09-01</time></p>
+<p>Status: <span style="color:#859900">Active</span></p>
+</header>
+
+<h2>Team</h2>
+<div id="join-request"></div>
+<dl>
+<dt>Foreman</dt>
+<dd><%= $foreman %></dd>
+<dt>Pilots</dt>
+% for my $pilot (@$pilots) {
+<dd><%= $pilot->{name} %></dd>
+% }
+</dl>
+<h2>Harvest Report</h2>
+%= form_for add => (method => 'POST') => begin
+%= select_field pilot => [['Select Pilot' => '', disabled => 'disabled', selected => 'selected'], ['Samwise Dagordae' => 'sam']]
+%= select_field resource => [['Select Resource' => '', disabled => 'disabled', selected => 'selected']]
+%= number_field 'units' => 0, min => 0
+%= submit_button
+% end
+<table>
+<thead><tr><th>Harvester</th><th>Resource</th><th>Units</th></tr></thead>
+<tbody id="harvest">
+</tbody>
+</table>
+%= javascript begin
+  new Ajax.PeriodicalUpdater('harvest', '/op/<%= $op %>/harvest_table.html', {
+    method: 'get', frequency: 1, decay: 2
+  });
+% end
