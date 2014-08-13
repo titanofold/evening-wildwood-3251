@@ -30,11 +30,18 @@ get '/test' => sub {
 
 get '/op';
 
-under '/op/:op' => [op => qr/\d+/];
+under '/op/:op' => [op => qr/\d+/] => sub {
+  my $self = shift;
+  $self->redirect_to('/op') unless $conn->run(
+    sub {
+      $_->selectrow_array(q|SELECT COUNT(*) FROM ew.ops WHERE id = ?|,
+        undef, $self->param('op'));
+    }
+  );
+};
 
 get '/' => sub {
   my $self = shift;
-  my $op   = $self->param('op');
   $self->render('op-index');
 };
 
