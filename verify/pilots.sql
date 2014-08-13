@@ -2,7 +2,7 @@
 
 BEGIN;
 
-SELECT id, name, password
+SELECT id, name
   FROM ew.pilots
  WHERE FALSE;
 
