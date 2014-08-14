@@ -12,7 +12,11 @@ helper 'db.foreman_for' => sub {
   my ($self, $op) = @_;
   $conn->run(
     sub {
-      $_->selectcol(q|SELECT foreman FROM ew.ops WHERE id = ?|, undef, $op);
+      $_->selectrow_array(
+        q|SELECT ew.pilots.name
+                            FROM ew.ops JOIN ew.pilots ON ew.ops.foreman = ew.pilots.id
+                            WHERE ew.ops.id = ?|, undef, $op
+      );
     }
   );
 };
@@ -73,7 +77,17 @@ get '/op/start' => sub {
 
 under '/op/:op' => [op => qr/\d+/] => sub {
   my $self = shift;
-  $self->redirect_to('/op') unless $self->db->op_exists($self->param('op'));
+  unless ($self->db->op_exists($self->param('op'))) {
+    $self->render('op_not_found');
+    return undef;
+  }
+
+  unless ($self->get_header_value('eve_trusted') eq "Yes") {
+    $self->render('trust');
+    return undef;
+  }
+
+  return 1;
 };
 
 get '/' => sub {

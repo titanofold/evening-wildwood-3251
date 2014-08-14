@@ -1,0 +1,16 @@
+% layout 'default';
+% title 'Trust Request';
+
+<h1 class="error">Trust Required</h1>
+
+<p>So, yeah, you do need to trust this site so we can glean a bit of pertinent
+information, and enable a few useful feature.</p>
+
+<p>Once you've trusted this site, you can <%= link_to continue =>
+url_for %> to the op.</p>
+
+%= javascript begin
+if (typeof CCPEVE === 'object') {
+CCPEVE.requestTrust('<%= url_for('/')->to_abs %>');
+}
+% end

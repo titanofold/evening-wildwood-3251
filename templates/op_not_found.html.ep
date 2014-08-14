@@ -1,0 +1,7 @@
+% layout 'default';
+% title "Op $op Not Found";
+
+<h1 class="error">Mining Op <%= $op %> Not Found</h1>
+
+<p>Couldn't find the op you are looking for. You were probably given a
+bad link. Ask the foreman to copy and paste the URL again.</p>
