@@ -9,8 +9,7 @@ WriteMakefile(
     'Mojolicious'     => '5.28',
     'DBD::Pg'         => 0,
     'DBIx::Connector' => 0,
-    'Number::Format'  => 0,
-    'App::Sqitch'     => 0
+    'Number::Format'  => 0
   },
   test => {TESTS => 't/*.t'}
 );

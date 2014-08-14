@@ -1,6 +1,2 @@
 #!/bin/sh
-
-# Only here until development reaches a more stable state
-sqitch -t ${DATABASE_URL} revert
-sqitch -t ${DATABASE_URL} deploy
 ./evening-wildwood daemon --listen http://*:$PORT --mode production
