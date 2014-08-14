@@ -2,8 +2,8 @@
 <html>
   <head>
     <meta name="viewport" content="initial-scale=1">
-    %= stylesheet '/c.css'
     <title><%= title %></title>
+    %= stylesheet '/c.css'
     %= javascript '//ajax.googleapis.com/ajax/libs/prototype/1.7.2.0/prototype.js'
   </head>
   <body>
@@ -13,18 +13,11 @@
       leverages <a href="http://mojolicio.us/">Mojolicious</a>, a next
       generation web framework for the <a href="http://www.perl.org/">Perl</a>
       programming language, and is hosted
-      on <a href="https://www.heroku.com/">Heroku</a>.</p>
-
-      <p>Contribute to this project
+      on <a href="https://www.heroku.com/">Heroku</a>
+      and <a href="https://www.heroku.com/postgres">Heroku
+      Postgres</a>. Contribute to this project
       on <a href="https://github.com/titanofold/evening-wildwood-3251">GitHub</a>,
       and/or donate a bit of ISK to Samwise Dagordae.</p>
     </footer>
-    %= javascript begin
-      var eve_trusted = <%= get_header_value('eve_trusted') ? 'true' : 'false' %>;
-
-      if (eve_trusted && typeof CCPEVE === 'object') {
-
-      }
-    % end
   </body>
 </html>

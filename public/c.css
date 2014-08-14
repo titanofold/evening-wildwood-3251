@@ -45,8 +45,6 @@ body {
 p {margin-bottom:1rem}
 strong, em {color:#93a1a1}
 
-footer {color:#586e75}
-
 h1, h2, h3, h4, h5, h6 {color:#b58900}
 h1 {
     font-size:2rem;
@@ -95,3 +93,11 @@ td:last-child {text-align:right}
     color: #fff;
     text-shadow: none;
 }
+
+.error {color:#dc322f}
+
+footer p {
+    color:#586e75;
+    font-size: .8rem;
+}
+
