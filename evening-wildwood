@@ -9,7 +9,7 @@ my $conn
 $conn->mode('fixup');
 
 helper 'db.foreman_for' => sub {
-  my ($self, $op) = @_;
+  my ($c, $op) = @_;
   $conn->run(
     sub {
       $_->selectrow_array(
@@ -23,7 +23,7 @@ helper 'db.foreman_for' => sub {
 
 # List pilots for the given op. Returns array ref
 helper 'db.pilots_for' => sub {
-  my ($self, $op) = @_;
+  my ($c, $op) = @_;
   $conn->run(
     sub {
       $_->selectcol(q|SELECT pilot_id FROM ew.op_participants WHERE op_id = ?|,
@@ -34,7 +34,7 @@ helper 'db.pilots_for' => sub {
 
 # Returns 1 if found, else 0
 helper 'db.op_exists' => sub {
-  my ($self, $op) = @_;
+  my ($c, $op) = @_;
   $conn->run(
     sub {
       $_->selectrow_array(q|SELECT COUNT(*) FROM ew.ops WHERE id = ?|,
@@ -47,43 +47,43 @@ helper get_header_value => sub { return shift->req->headers->header(shift) };
 
 helper format_number => sub {
   use Number::Format;
-  my ($self, $n) = @_;
+  my ($c, $n) = @_;
   state $f = Number::Format->new(-thousands_sep => ',', -decimal_point => '.');
   return $f->format_number($n);
 };
 
 get '/' => sub {
-  my $self = shift;
-  $self->render('index');
+  my $c = shift;
+  $c->render('index');
 };
 
 get '/test' => sub {
-  my $self = shift;
-  $self->stash(headers => $self->req->headers);
-  $self->render;
+  my $c = shift;
+  $c->stash(headers => $c->req->headers);
+  $c->render;
 };
 
 get '/op';
 get '/op/start' => sub {
-  my $self = shift;
+  my $c = shift;
 
   $conn->txn(
     sub {
       $_->do(q|INSERT INTO ops VALUES (?) RETRUNING id|,
-        undef, $self->get_header_value('eve_charid'));
+        undef, $c->get_header_value('eve_charid'));
     }
   );
 };
 
 under '/op/:op' => [op => qr/\d+/] => sub {
-  my $self = shift;
-  unless ($self->db->op_exists($self->param('op'))) {
-    $self->render('op_not_found');
+  my $c = shift;
+  unless ($c->db->op_exists($c->param('op'))) {
+    $c->render('op_not_found');
     return undef;
   }
 
-  unless ($self->get_header_value('eve_trusted') eq "Yes") {
-    $self->render('trust');
+  unless ($c->get_header_value('eve_trusted') eq "Yes") {
+    $c->render('trust');
     return undef;
   }
 
@@ -91,26 +91,26 @@ under '/op/:op' => [op => qr/\d+/] => sub {
 };
 
 get '/' => sub {
-  my $self = shift;
-  $self->render('op-index');
+  my $c = shift;
+  $c->render('op-index');
 };
 
 get '/harvest_table';
 get '/loot_table';
 
 post '/add_harvest' => sub {
-  my $self = shift;
-  $self->redirect_to('/');
+  my $c = shift;
+  $c->redirect_to('/');
 };
 
 get '/join' => sub {
-  my $self = shift;
-  $self->redirect_to('/');
+  my $c = shift;
+  $c->redirect_to('/');
 };
 
 get '/finish' => sub {
-  my $self = shift;
-  $self->redirect_to('/');
+  my $c = shift;
+  $c->redirect_to('/');
 };
 
 app->start;
