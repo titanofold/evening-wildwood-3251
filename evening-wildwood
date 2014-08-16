@@ -1,22 +1,28 @@
 #!/usr/bin/env perl
+use v5.18;
 use Mojolicious::Lite;
 use DBIx::Connector;
 
 my $conn
   = DBIx::Connector->new("dbi:Pg:$ENV{DATABASE_URL}", '', '',
-  {AutoCommit => 0})
+  {AutoCommit => 1, RaiseError => 1})
   or die;
 $conn->mode('fixup');
 
+####################
+# Database Helpers #
+####################
 helper 'db.foreman_for' => sub {
   my ($c, $op) = @_;
   $conn->run(
     sub {
-      $_->selectrow_array(
+      my $dbh = $_;
+      my $sth = $dbh->prepare_cached(
         q|SELECT ew.pilots.name
-                            FROM ew.ops JOIN ew.pilots ON ew.ops.foreman = ew.pilots.id
-                            WHERE ew.ops.id = ?|, undef, $op
+                                       FROM ew.ops JOIN ew.pilots ON ew.ops.foreman = ew.pilots.id
+                                       WHERE ew.ops.id = ?|
       );
+      $dbh->selectrow_array($sth, undef, $op);
     }
   );
 };
@@ -26,8 +32,14 @@ helper 'db.pilots_for' => sub {
   my ($c, $op) = @_;
   $conn->run(
     sub {
-      $_->selectcol(q|SELECT pilot_id FROM ew.op_participants WHERE op_id = ?|,
-        undef, $op);
+      my $dbh = $_;
+      my $sth = $dbh->prepare_cached(
+        q|SELECT ew.pilots.name, ew.pilots.id
+                                       FROM ew.op_participants
+                                       JOIN ON ew.op_participants.pilot_id = ew.pilots.id
+                                       WHERE op_id = ?|
+      );
+      $dbh->selectcol($sth, undef, $op);
     }
   );
 };
@@ -37,13 +49,68 @@ helper 'db.op_exists' => sub {
   my ($c, $op) = @_;
   $conn->run(
     sub {
-      $_->selectrow_array(q|SELECT COUNT(*) FROM ew.ops WHERE id = ?|,
-        undef, $op);
+      my $dbh = $_;
+      my $sth
+        = $dbh->prepare_cached(q|SELECT COUNT(*) FROM ew.ops WHERE id = ?|);
+      $dbh->selectrow_array($sth, undef, $op);
     }
   );
 };
 
+helper 'db.harvested' => sub {
+  my ($c, $op) = @_;
+  $conn->run(
+    sub {
+      my $dbh = $_;
+      my $sth = $dbh->prepare_cached(
+        q|SELECT pilot, resource, units FROM ew.harvested WHERE id = ?|);
+      $dbh->selectall_hashref($sth, undef, $op);
+    }
+  );
+};
+
+sub verify_pilot {
+  my ($id, $name) = @_;
+
+  return 0 unless $id and $name;
+
+  return 1 if $conn->run(
+    sub {
+      $_->selectrow_array(
+        q|SELECT COUNT(*) FROM ew.pilots WHERE id = ? AND name = ?|,
+        undef, $id, $name);
+    }
+  );
+
+  my $ua = Mojo::UserAgent->new;
+  my $eve_id
+    = $ua->get(
+    "https://api.eveonline.com/eve/CharacterID.xml.aspx?names=$name")
+    ->res->dom->at("row[name=$name]")->attr('characterID');
+  my $eve_name
+    = $ua->get("https://api.eveonline.com/eve/CharacterName.xml.aspx?ids=$id")
+    ->res->dom->at('row[characterID=$id]')->attr('name');
+
+  if ($id eq $eve_id && $name eq $eve_name) {
+    my $rv = $conn->txn(
+      sub {
+        $_->do(q|INSERT INTO pilots (id, name) VALUES (?, ?)|,
+          undef, $id, $name);
+      }
+    );
+    return 1 if $rv == 1;
+  }
+
+  return 0;
+}
+
+################
+# Data Helpers #
+################
 helper get_header_value => sub { return shift->req->headers->header(shift) };
+
+helper trusted_by_eve =>
+  sub { return shift->get_header_value('eve_trusted') eq "Yes" };
 
 helper format_number => sub {
   use Number::Format;
@@ -64,15 +131,28 @@ get '/test' => sub {
 };
 
 get '/op';
-get '/op/start' => sub {
+get '/new-op' => sub {
   my $c = shift;
 
-  $conn->txn(
-    sub {
-      $_->do(q|INSERT INTO ops VALUES (?) RETRUNING id|,
-        undef, $c->get_header_value('eve_charid'));
-    }
-  );
+  unless ($c->trusted_by_eve) {
+    $c->render('trust');
+  }
+
+  my $pilot_id   = $c->get_header_value('eve_charid');
+  my $pilot_name = $c->get_header_value('eve_charname');
+  if (verify_pilot($pilot_id, $pilot_name)) {
+    my $op = $conn->txn(
+      sub {
+        $_->selectrow_array(
+          q|INSERT INTO ops (foreman) VALUES (?) RETURNING id|,
+          undef, $pilot_id);
+      }
+    );
+    $c->redirect_to("/op/$op");
+  }
+  else {
+    $c->render('bad-pilot');
+  }
 };
 
 under '/op/:op' => [op => qr/\d+/] => sub {
@@ -82,7 +162,7 @@ under '/op/:op' => [op => qr/\d+/] => sub {
     return undef;
   }
 
-  unless ($c->get_header_value('eve_trusted') eq "Yes") {
+  unless ($c->trusted_by_eve) {
     $c->render('trust');
     return undef;
   }
