@@ -19,8 +19,8 @@ helper 'db.foreman_for' => sub {
       my $dbh = $_;
       my $sth = $dbh->prepare_cached(
         q|SELECT ew.pilots.name
-                                       FROM ew.ops JOIN ew.pilots ON ew.ops.foreman = ew.pilots.id
-                                       WHERE ew.ops.id = ?|
+          FROM ew.ops JOIN ew.pilots ON ew.ops.foreman = ew.pilots.id
+          WHERE ew.ops.id = ?|
       );
       $dbh->selectrow_array($sth, undef, $op);
     }
@@ -35,9 +35,9 @@ helper 'db.pilots_for' => sub {
       my $dbh = $_;
       my $sth = $dbh->prepare_cached(
         q|SELECT ew.pilots.name, ew.pilots.id
-                                       FROM ew.op_participants
-                                       JOIN ON ew.op_participants.pilot_id = ew.pilots.id
-                                       WHERE op_id = ?|
+          FROM ew.op_participants
+          JOIN ON ew.op_participants.pilot_id = ew.pilots.id
+          WHERE op_id = ?|
       );
       $dbh->selectcol($sth, undef, $op);
     }
