@@ -124,13 +124,14 @@ get '/' => sub {
   $c->render('index');
 };
 
+get '/bad-pilot';
+
 get '/test' => sub {
   my $c = shift;
   $c->stash(headers => $c->req->headers);
   $c->render;
 };
 
-get '/op';
 get '/new-op' => sub {
   my $c = shift;
 
@@ -144,7 +145,7 @@ get '/new-op' => sub {
     my $op = $conn->txn(
       sub {
         $_->selectrow_array(
-          q|INSERT INTO ops (foreman) VALUES (?) RETURNING id|,
+          q|INSERT INTO ew.ops (foreman) VALUES (?) RETURNING id|,
           undef, $pilot_id);
       }
     );

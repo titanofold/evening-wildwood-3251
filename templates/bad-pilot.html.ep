@@ -1,0 +1,7 @@
+% layout 'default';
+% title 'Bad Pilot Request';
+
+<h1 class="error">Bad Pilot Request</h1>
+
+<p>The information you supplied couldn't be verified, ergo you're a
+bad pilot.</p>

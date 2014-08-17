@@ -7,10 +7,10 @@
 information, and enable a few useful feature.</p>
 
 <p>Once you've trusted this site, you can <%= link_to continue =>
-url_for %> to the op.</p>
+url_for %>.</p>
 
 %= javascript begin
-if (typeof CCPEVE === 'object') {
-CCPEVE.requestTrust('<%= url_for('/')->to_abs %>');
-}
+  if (typeof CCPEVE === 'object') {
+    CCPEVE.requestTrust('<%= url_for('/')->to_abs %>');
+  }
 % end
