@@ -6,7 +6,7 @@ use DBIx::Connector;
 use Try::Tiny;
 
 try {
-  my $sqitch = App::Sqitch::Command->load(
+  my $revert = App::Sqitch::Command->load(
     {
       sqitch  => App::Sqitch->new,
       config  => App::Sqitch::Config->new,
@@ -14,7 +14,7 @@ try {
       args    => ['-y', '-t', $ENV{DATABASE_URL}]
     }
   );
-  $sqitch->execute;
+  $revert->execute;
 };
 
 try {
@@ -26,7 +26,7 @@ try {
       args    => ['-t', $ENV{DATABASE_URL}]
     }
   );
-  $sqitch->execute;
+  $deploy->execute;
 };
 
 my $conn
