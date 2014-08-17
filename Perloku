@@ -1,4 +1,2 @@
 #!/bin/sh
-sqitch revert -y -t ${DATABASE_URL}
-sqitch deploy -t ${DATABASE_URL}
 ./evening-wildwood daemon --listen http://*:$PORT --mode production

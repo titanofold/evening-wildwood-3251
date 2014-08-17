@@ -1,7 +1,27 @@
 #!/usr/bin/env perl
 use v5.18;
 use Mojolicious::Lite;
+use App::Sqitch;
 use DBIx::Connector;
+
+my $sqitch = App::Sqitch::Command->load(
+  {
+    sqitch  => App::Sqitch->new,
+    config  => App::Sqitch::Config->new,
+    command => 'revert',
+    args    => ['-y', '-t', $ENV{DATABASE_URL}]
+  }
+);
+$sqitch->execute;
+$sqitch = App::Sqitch::Command->load(
+  {
+    sqitch  => App::Sqitch->new,
+    config  => App::Sqitch::Config->new,
+    command => 'deploy',
+    args    => ['-t', $ENV{DATABASE_URL}]
+  }
+);
+$sqitch->execute;
 
 my $conn
   = DBIx::Connector->new("dbi:Pg:$ENV{DATABASE_URL}", '', '',
