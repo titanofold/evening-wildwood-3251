@@ -158,7 +158,7 @@ get '/new-op' => sub {
 under '/op/:op' => [op => qr/\d+/] => sub {
   my $c = shift;
   unless ($c->db->op_exists($c->param('op'))) {
-    $c->render('op_not_found');
+    $c->render('op-not-found');
     return undef;
   }
 
@@ -175,8 +175,8 @@ get '/' => sub {
   $c->render('op-index');
 };
 
-get '/harvest_table';
-get '/loot_table';
+get '/harvest-table';
+get '/loot-table';
 
 post '/add_harvest' => sub {
   my $c = shift;
@@ -184,7 +184,10 @@ post '/add_harvest' => sub {
 };
 
 get '/join' => sub {
-  my $c = shift;
+  my $c          = shift;
+  my $pilot_id   = $c->get_header_value('eve_charid');
+  my $pilot_name = $c->get_header_value('eve_charname');
+  $c->render('bad-pilot') unless verify_pilot($pilot_id, $pilot_name);
   $c->redirect_to('/');
 };
 
