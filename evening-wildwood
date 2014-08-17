@@ -130,8 +130,6 @@ get '/' => sub {
   $c->render('index');
 };
 
-get '/bad-pilot';
-
 get '/test' => sub {
   my $c = shift;
   $c->stash(headers => $c->req->headers);
