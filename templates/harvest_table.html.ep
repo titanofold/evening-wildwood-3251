@@ -1,11 +1,4 @@
-% my $harvest_pilots = {
-%   'Samwise Dagordae' => {
-%    'Condensed Scordite' => 123456,
-%    'Scordite' => 342132,
-%    'Plagioclase' => 543244
-%   }
-% };
-
+% my $harvest_pilots = $c->db->harvested($op);
 % for my $pilot (sort keys $harvest_pilots) {
   % my $first = 1;
   % for my $resource (sort keys $harvest_pilots->{$pilot}) {

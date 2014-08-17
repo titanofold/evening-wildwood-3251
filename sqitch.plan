@@ -8,3 +8,4 @@ harvestable_types_data [harvestable_types] 2014-06-18T11:48:51Z Aaron W. Swenson
 pilots [appschema] 2014-06-19T10:16:46Z Aaron W. Swenson <aaron.w.swenson@gmail.com> # Create pilots table
 ops [appschema pilots] 2014-06-19T10:28:52Z Aaron W. Swenson <aaron.w.swenson@gmail.com> # Create ops table
 op_participants [ops pilots] 2014-06-19T10:50:43Z Aaron W. Swenson <aaron.w.swenson@gmail.com> # Create op_participants table
+harvested [pilots ops op_participants harvestable_types] 2014-08-17T11:20:13Z Aaron W. Swenson <aaron.w.swenson@gmail.com># Track harvested resources by resource, by pilot, by op.
