@@ -10,7 +10,8 @@ WriteMakefile(
     'DBD::Pg'         => 0,
     'DBIx::Connector' => 0,
     'Number::Format'  => 0,
-    'App::Sqitch'     => 0
+    'App::Sqitch'     => 0,
+    'Try::Tiny'       => 0
   },
   test => {TESTS => 't/*.t'}
 );
