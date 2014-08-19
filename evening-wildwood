@@ -17,17 +17,15 @@ try {
   $revert->execute;
 };
 
-try {
-  my $deploy = App::Sqitch::Command->load(
-    {
-      sqitch  => App::Sqitch->new,
-      config  => App::Sqitch::Config->new,
-      command => 'deploy',
-      args    => ['-t', $ENV{DATABASE_URL}]
-    }
-  );
-  $deploy->execute;
-};
+my $deploy = App::Sqitch::Command->load(
+  {
+    sqitch  => App::Sqitch->new,
+    config  => App::Sqitch::Config->new,
+    command => 'deploy',
+    args    => ['-t', $ENV{DATABASE_URL}]
+  }
+);
+$deploy->execute;
 
 my $conn
   = DBIx::Connector->new("dbi:Pg:$ENV{DATABASE_URL}", '', '',
