@@ -30,7 +30,7 @@
 </tbody>
 </table>
 %= javascript begin
-  new Ajax.PeriodicalUpdater('harvest', '/op/<%= $op %>/harvest_table.html', {
+  new Ajax.PeriodicalUpdater('harvest', '/op/<%= $op %>/harvest-table.html', {
     method: 'get', frequency: 1, decay: 2
   });
 % end

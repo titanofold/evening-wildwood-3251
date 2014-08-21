@@ -90,19 +90,24 @@ sub verify_pilot {
     }
   );
 
+  my ($eve_id, $eve_name);
   my $ua = Mojo::UserAgent->new;
-  my $eve_id
-    = $ua->get(
-    "https://api.eveonline.com/eve/CharacterID.xml.aspx?names=$name")
-    ->res->dom->at("row[name=$name]")->attr('characterID');
-  my $eve_name
-    = $ua->get("https://api.eveonline.com/eve/CharacterName.xml.aspx?ids=$id")
-    ->res->dom->at('row[characterID=$id]')->attr('name');
 
-  if ($id eq $eve_id && $name eq $eve_name) {
+  my $res = $ua->get(
+    "https://api.eveonline.com/eve/CharacterID.xml.aspx?names=$name")->res;
+  $eve_id = $res->dom->at("row[name=$name]") if $res->code == 200;
+  $eve_id = $eve_id->attr('characterID')     if $eve_id;
+
+  $res
+    = $ua->get("https://api.eveonline.com/eve/CharacterName.xml.aspx?ids=$id")
+    ->res;
+  $eve_name = $res->dom->at("row[characterID=$id]") if $res->code == 200;
+  $eve_name = $eve_name->attr('name') if $eve_name;
+
+  if ($eve_id && $eve_name && $id eq $eve_id && $name eq $eve_name) {
     my $rv = $conn->txn(
       sub {
-        $_->do(q|INSERT INTO pilots (id, name) VALUES (?, ?)|,
+        $_->do(q|INSERT INTO ew.pilots (id, name) VALUES (?, ?)|,
           undef, $id, $name);
       }
     );
@@ -117,8 +122,11 @@ sub verify_pilot {
 ################
 helper get_header_value => sub { return shift->req->headers->header(shift) };
 
-helper trusted_by_eve =>
-  sub { return shift->get_header_value('eve_trusted') eq "Yes" };
+helper trusted_by_eve => sub {
+  my $c       = shift;
+  my $trusted = $c->get_header_value('eve_trusted');
+  return $trusted && $trusted eq "Yes" ? 1 : 0;
+};
 
 helper format_number => sub {
   use Number::Format;
@@ -141,13 +149,15 @@ get '/test' => sub {
 get '/new-op' => sub {
   my $c = shift;
 
-  unless ($c->trusted_by_eve) {
-    $c->render('trust');
-  }
-
   my $pilot_id   = $c->get_header_value('eve_charid');
   my $pilot_name = $c->get_header_value('eve_charname');
-  if (verify_pilot($pilot_id, $pilot_name)) {
+  if (not $c->trusted_by_eve) {
+    $c->render('trust');
+  }
+  elsif (not verify_pilot($pilot_id, $pilot_name)) {
+    $c->render('bad-pilot');
+  }
+  else {
     my $op = $conn->txn(
       sub {
         $_->selectrow_array(
@@ -156,9 +166,6 @@ get '/new-op' => sub {
       }
     );
     $c->redirect_to("/op/$op");
-  }
-  else {
-    $c->render('bad-pilot');
   }
 };
 
