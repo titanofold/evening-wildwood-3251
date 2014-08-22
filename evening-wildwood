@@ -65,11 +65,13 @@ helper 'db.harvested' => sub {
     sub {
       my $dbh = $_;
       my $sth = $dbh->prepare_cached(
-        q|    SELECT ew.pilot.name AS pilot,
-                     ew.harvestable_types.name AS resource, ew.harvested.units
+        q|    SELECT ew.pilots.name AS pilot,
+                     ew.harvestable_types.name AS resource,
+                     ew.harvested.units
                 FROM ew.harvested
           INNER JOIN ew.pilots ON ew.harvested.pilot_id = ew.pilots.id
-          INNER JOIN ew.harvestable_types ON ew.harvested.resource_id
+          INNER JOIN ew.harvestable_types
+                     ON ew.harvested.resource_id = ew.harvestable_types.id
                WHERE ew.harvested.op_id = ?|
       );
       $dbh->selectall_hashref($sth, [qw(pilot resource)], undef, $op);
@@ -189,10 +191,10 @@ get '/' => sub {
   $c->render('op-index');
 };
 
-get '/harvest-table';
+get '/harvest-table' => 'harvest-table';
 get '/loot-table';
 
-post '/add_harvest' => sub {
+post '/add-harvest' => sub {
   my $c = shift;
   $c->redirect_to('/');
 };
