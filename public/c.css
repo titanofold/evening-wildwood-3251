@@ -39,7 +39,8 @@ html, body {overflow:auto}
 body {
     padding: 1rem;
     line-height: 1.4rem;
-
+	max-width: 45rem;
+	margin: auto;
 }
 
 p {margin-bottom:1rem}
