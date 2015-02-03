@@ -1,6 +1,6 @@
 % layout 'default';
-% my $foreman = 'Samwise Dagordae';
-% my $pilots = [{name => 'Samwise Dagordae', id => 12341234}];
+% my $data = shift;
+% my $pilots = $data->{pilots};
 <header>
 <h1>Mining Operation #<%= $op %></h1>
 <p>Started: <time datetime="">2014-09-01</time></p>
@@ -11,7 +11,7 @@
 <div id="join-request"></div>
 <dl>
 <dt>Foreman</dt>
-<dd><%= $foreman %></dd>
+<dd><%= $c->db->foreman_for($op) %></dd>
 <dt>Pilots</dt>
 % for my $pilot (@$pilots) {
 <dd><%= $pilot->{name} %></dd>
@@ -19,15 +19,14 @@
 </dl>
 <h2>Harvest Report</h2>
 %= form_for add => (method => 'POST') => begin
-%= select_field pilot => [['Select Pilot' => '', disabled => 'disabled', selected => 'selected'], ['Samwise Dagordae' => 'sam']]
+%= select_field pilot => [['Select Pilot' => '', disabled => 'disabled', selected => 'selected']]
 %= select_field resource => [['Select Resource' => '', disabled => 'disabled', selected => 'selected']]
 %= number_field 'units' => 0, min => 0
 %= submit_button
 % end
 <table>
 <thead><tr><th>Harvester</th><th>Resource</th><th>Units</th></tr></thead>
-<tbody id="harvest">
-</tbody>
+<tbody id="harvest"></tbody>
 </table>
 %= javascript begin
   new Ajax.PeriodicalUpdater('harvest', '/op/<%= $op %>/harvest-table.html', {
