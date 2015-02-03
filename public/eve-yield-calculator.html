@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<title>Yield Calculator for EVE Online</title>
+  </head>
+  <body>
+	<h1>Yield Calculator for EVE Online</h1>
+
+	<h2>Ships</h2>
+	<select id="ship">
+	  <option value="" disabled selected>Select Your Ship</option>
+	</select>
+
+	<h2>Skill Levels</h2>
+
+	<label for="mining-frigate">Mining Frigate</label>:
+	<input id="mining-frigate" name="mining-frigate" type="number"
+		   pattern="[0-5]" min="0" max="5" value="0"><br>
+	
+	<label for="expedition-frigates">Expedition Frigates</label>:
+	<input id="expedition-frigates" name="expedition-frigates"
+		   type="number" min="0" max="5" value="0"><br>
+	
+	<label for="mining-barge">Mining Barge</label>:
+	<input id="mining-barge" name="mining-barge" type="number" min="0"
+		   max="5" value="0"><br>
+
+	<label for="exhumer">Exhumer</label>:
+	<input id="exhumer" name="exhumer" type="number" min="0" max="5"
+		   value="0"><br>
+
+	<label for="mining">Mining</label>:
+	<input id="mining" name="mining" type="number" min="0" max="5"
+		   value="0"><br>
+
+	<label for="astrogeology">Astrogeology</label>:
+	<input id="astrogeology" name="astrogeology" type="number" min="0"
+		   max="5" value="0"><br>
+
+	<label for="ice-harvesting">Ice Harvesting</label>:
+	<input id="ice-harvesting" name="ice-harvesting" type="number"
+		   min="0" max="5" value="0"><br>
+
+	<h2>Equipment</h2>
+	<select id="equipment">
+	  <option value="" disabled selected>Select Your Equipment</option>
+	</select>
+
+	<h2>Mining Yield</h2>
+	Cycle Duration:
+	Yield per turret per cyle:
+	Total yield per cycle:
+	Total yield per minute:
+
+	<script>
+	 var ships = {
+	   Venture: {
+		 'mining-frigate': {
+		   yield: { ore: 0.05 },
+		   duration: { gas: 0.05 }
+		 },
+		 role: { yield: { ore: 1, gas: 1 } }
+	   },
+
+	   Prospect: {
+		 'mining-frigate': {
+		   yield: { ore: 0.05 },
+		   duration: { gas: 0.05 }
+		 },
+		 'expedition-frigates': { yield: { ore: 0.05 } },
+		 role: { yield: { ore: 1, gas: 1 } }
+	   },
+
+	   Procurer: {
+		 'mining-barge': { duration: { ore: 0.02, ice: 0.02 } },
+		 role: { yield: { ore: 1.5 }, duration: { ice: 0.6 } }
+	   },
+
+	   Skiff: {
+		 'mining-barge': { duration: { ore: 0.02, ice: 0.02 } },
+		 exhumers: { duration: { ore: 0.02, ice: 0.02 } },
+		 role: { yield: { ore: 1.5 }, duration: { ice: 0.6 } }
+	   },
+
+	   Retriever: {
+		 'mining-barge': { duration: { ore: 0.02, ice: 0.02 } },
+		 role: { yield: { ore: 0.25 }, duration: { ice: 0.2 } }
+	   },
+
+	   Mackinaw: {
+		 'mining-barge': { duration: { ore: 0.02, ice: 0.02 } },
+		 exhumers: { duration: { ore: 0.02, ice: 0.02 } },
+		 role: { yield: { ore: 0.25 }, duration: { ice: 0.2 } }
+	   },
+
+	   Covetor: {
+		 'mining-barge': { duration: { ore: 0.04, ice: 0.04 } }
+	   },
+
+	   Hulk: {
+		 'mining-barge': { duration: { ore: 0.04, ice: 0.04 } },
+		 exhumers: { duration: { ore: 0.03, ice: 0.03 } }
+	   },
+	 };
+
+	 var equipment = {
+	   'EP-R Argon Ion Basic Excavation Pulse': {
+		 duration: 60,
+		 amount: 21
+	   },
+
+	   'Single Diode Basic Mining Laser': {
+		 duration: 60,
+		 amount: 22
+	   },
+
+	   'Xenon Basic Drilling Beam': {
+		 duration: 60,
+		 amount: 23
+	   },
+
+	   'Rubin Basic Particle Bore Stream': {
+		 duration: 60,
+		 amount: 24
+	   },
+
+	   'Civilian Miner': {
+		 duration: 60,
+		 amount: 30
+	   },
+
+	   "Gallente Mining Laser": {
+		 duration: 60,
+		 amount: 40
+	   },
+
+	   "ORE Deep Core Mining Laser": {
+		 duration: 60,
+		 amount: 40
+	   },
+
+	   "Miner I": {
+		 duration: 60,
+		 amount: 40
+	   },
+
+	   "Deep Core Mining Laser I": {
+		 duration: 60,
+		 amount: 40
+	   },
+
+	   "EP-S Gaussian Excavation Pulse": {
+		 duration: 60,
+		 amount: 42
+	   },
+
+	   "Dual Diode Mining Laser I": {
+		 duration: 60,
+		 amount: 44
+	   },
+
+	   "XeCl Drilling Beam I": {
+		 duration: 60,
+		 amount: 47
+	   },
+
+	   "Cu Vapor Particle Bore Stream I": {
+		 duration: 60,
+		 amount: 49
+	   },
+
+	   "'Habitat' Miner I": {
+		 duration: 60,
+		 amount: 55
+	   },
+
+	   "Miner II": {
+		 duration: 60,
+		 amount: 60
+	   },
+
+	   "'Wild' Miner I": {
+		 duration: 60,
+		 amount: 60
+	   },
+
+	   "ORE Miner": {
+		 duration: 60,
+		 amount: 60
+	   },
+
+	   "Modulated Deep Core Miner II": {
+		 duration: 180,
+		 amount: 120
+	   },
+
+	   "Modulated Deep Core Strip Miner II": {
+		 duration: 180,
+		 amount: 250
+	   },
+
+	   "Modulated Strip Miner II": {
+		 duration: 180,
+		 amount: 360
+	   },
+
+	   "ORE Strip Miner": {
+		 duration: 180,
+		 amount: 540
+	   },
+
+	   "Strip Miner I": {
+		 duration: 180,
+		 amount: 540
+	   },
+
+	   "Ice Harvester I": {
+		 duration: 300,
+		 amount: 1000
+	   },
+
+	   "ORE Ice Harvester": {
+		 duration: 250,
+		 amount: 1000
+	   },
+
+	   "Ice Harvester II": {
+		 duration: 250,
+		 amount: 1000
+	   }
+	 };
+
+	 var equiplist = document.getElementById("equipment");
+
+	 var equipment_keys = Object.keys(equipment);
+	 equipment_keys.sort();
+	 for (i = 0; i < equipment_keys.length; i++) {
+	   var option = document.createElement("option");
+	   option.text = equipment_keys[i];
+	   option.setAttribute("value", equipment_keys[i]);
+	   equiplist.add(option);
+	 }
+
+	 var shiplist = document.getElementById("ship");
+	 for (key in ships) {
+	   var option = document.createElement("option");
+	   option.text = key;
+	   option.setAttribute("value", key);
+	   shiplist.add(option);
+	 }
+
+	 function calculateDuration() {}
+	 function calculateYield() {}
+
+document.getElementById("mining-frigate").addEventListener("input",)
+	</script>
+  </body>
+</html>
