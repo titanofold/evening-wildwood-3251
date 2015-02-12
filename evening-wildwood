@@ -1,82 +1,60 @@
 #!/usr/bin/env perl
-use v5.18;
+use v5.20;
 use Mojolicious::Lite;
-use App::Sqitch;
-use DBIx::Connector;
-use Try::Tiny;
+use Mojo::Pg;
 
-my $conn
-  = DBIx::Connector->new("dbi:Pg:$ENV{DATABASE_URL}", '', '',
-  {AutoCommit => 1, RaiseError => 1})
-  or die;
-$conn->mode('fixup');
+use experimental 'signatures';
+
+helper pg => sub { state $pg = Mojo::Pg->new($ENV{DATABASE_URL}) };
 
 ####################
 # Database Helpers #
 ####################
 helper 'db.foreman_for' => sub {
   my ($c, $op) = @_;
-  $conn->run(
-    sub {
-      my $dbh = $_;
-      my $sth = $dbh->prepare_cached(
-        q|SELECT ew.pilots.name
-          FROM ew.ops JOIN ew.pilots ON ew.ops.foreman = ew.pilots.id
-          WHERE ew.ops.id = ?|
-      );
-      $dbh->selectrow_array($sth, undef, $op);
-    }
-  );
+  $c->pg->db->query(
+    q|
+    SELECT ew.pilots.name
+    FROM ew.ops JOIN ew.pilots ON ew.ops.foreman = ew.pilots.id
+    WHERE ew.ops.id = ?
+    |, $op
+  )->array;
 };
 
 # List pilots for the given op. Returns array ref
 helper 'db.pilots_for' => sub {
   my ($c, $op) = @_;
-  $conn->run(
-    sub {
-      my $dbh = $_;
-      my $sth = $dbh->prepare_cached(
-        q|SELECT ew.pilots.name, ew.pilots.id
-          FROM ew.op_participants
-          JOIN ON ew.op_participants.pilot_id = ew.pilots.id
-          WHERE op_id = ?|
-      );
-      $dbh->selectcol($sth, undef, $op);
-    }
-  );
+  $c->pg->db->query(
+    q|
+      SELECT ew.pilots.name, ew.pilots.id
+      FROM ew.op_participants
+      JOIN ON ew.op_participants.pilot_id = ew.pilots.id
+      WHERE op_id = ?|, $op
+  )->arrays;
 };
 
 # Returns 1 if found, else 0
 helper 'db.op_exists' => sub {
   my ($c, $op) = @_;
-  $conn->run(
-    sub {
-      my $dbh = $_;
-      my $sth
-        = $dbh->prepare_cached(q|SELECT COUNT(*) FROM ew.ops WHERE id = ?|);
-      $dbh->selectrow_array($sth, undef, $op);
-    }
+  $c->pg->db->query(
+    q|
+    SELECT COUNT(*) FROM ew.ops WHERE id = ?
+    |, $op
   );
 };
 
 helper 'db.harvested' => sub {
   my ($c, $op) = @_;
-  $conn->run(
-    sub {
-      my $dbh = $_;
-      my $sth = $dbh->prepare_cached(
-        q|    SELECT ew.pilots.name AS pilot,
+  $c->pg->db->query(
+    q|    SELECT ew.pilots.name AS pilot,
                      ew.harvestable_types.name AS resource,
                      ew.harvested.units
                 FROM ew.harvested
           INNER JOIN ew.pilots ON ew.harvested.pilot_id = ew.pilots.id
           INNER JOIN ew.harvestable_types
                      ON ew.harvested.resource_id = ew.harvestable_types.id
-               WHERE ew.harvested.op_id = ?|
-      );
-      $dbh->selectall_hashref($sth, [qw(pilot resource)], undef, $op);
-    }
-  );
+               WHERE ew.harvested.op_id = ?|, $op
+  )->array;
 };
 
 sub verify_pilot {
@@ -84,13 +62,12 @@ sub verify_pilot {
 
   return 0 unless $id and $name;
 
-  return 1 if $conn->run(
-    sub {
-      $_->selectrow_array(
-        q|SELECT COUNT(*) FROM ew.pilots WHERE id = ? AND name = ?|,
-        undef, $id, $name);
-    }
-  );
+  state $pg = Mojo::Pg->new($ENV{DATABASE_URL});
+  my $db = $pg->db;
+
+  return 1
+    if $db->query(q|SELECT COUNT(*) FROM ew.pilots WHERE id = ? AND name = ?|,
+    $id, $name)->array->[0];
 
   my ($eve_id, $eve_name);
   my $ua = Mojo::UserAgent->new;
@@ -106,15 +83,16 @@ sub verify_pilot {
   $eve_name = $res->dom->at("row[characterID=$id]") if $res->code == 200;
   $eve_name = $eve_name->attr('name') if $eve_name;
 
+  my $results;
   if ($eve_id && $eve_name && $id eq $eve_id && $name eq $eve_name) {
-    my $rv = $conn->txn(
-      sub {
-        $_->do(q|INSERT INTO ew.pilots (id, name) VALUES (?, ?)|,
-          undef, $id, $name);
-      }
-    );
-    return 1 if $rv == 1;
+    $db->begin;
+    $results
+      = $db->query(q|INSERT INTO ew.pilots (id, name) VALUES (?, ?)|, $id,
+      $name);
+    $db->commit;
   }
+
+  return 1 if $results->rows == 1;
 
   return 0;
 }
@@ -137,9 +115,37 @@ helper format_number => sub {
   return $f->format_number($n);
 };
 
-get '/' => sub {
-  my $c = shift;
-  $c->render('index');
+##########
+# Routes #
+##########
+get '/' => sub ($c) {
+  my $op_id;
+  if ($c->param('j') or $c->param('l')) {
+    $op_id = $c->param('l') || $c->param('j');
+    $op_id =~ s/\D//g;
+  }
+
+  if    ($op_id and $c->param('j')) { $c->redirect_to("/op/$op_id/join") }
+  elsif ($op_id and $c->param('l')) { $c->redirect_to("/op/$op_id") }
+  else                              { $c->render('index') }
+};
+
+get '/db_setup' => sub ($c) {
+  my $migrations = Mojo::Pg::Migrations->new(pg => $c->pg);
+  $migrations->from_file('migrations.sql');
+  $migrations->migrate;
+  if ($migrations->active == $migrations->latest) {
+    $c->render(
+      code => 200,
+      text => 'Database migrated to '
+        . $migrations->active
+        . '. EVEning Wildwood is ready to do your bidding.'
+    );
+  }
+  else {
+    $c->render(
+      text => 'Database migration failed. Check STDERR for reasons why.');
+  }
 };
 
 get '/test' => sub {
@@ -148,7 +154,7 @@ get '/test' => sub {
   $c->render;
 };
 
-get '/new-op' => sub {
+get '/op/new' => sub {
   my $c = shift;
 
   my $pilot_id   = $c->get_header_value('eve_charid');
@@ -160,13 +166,12 @@ get '/new-op' => sub {
     $c->render('bad-pilot');
   }
   else {
-    my $op = $conn->txn(
-      sub {
-        $_->selectrow_array(
-          q|INSERT INTO ew.ops (foreman) VALUES (?) RETURNING id|,
-          undef, $pilot_id);
-      }
-    );
+    my $db = $c->pg->db;
+    $db->begin;
+    my $op
+      = $db->query(q|INSERT INTO ew.ops (foreman) VALUES (?) RETURNING id|,
+      $pilot_id);
+    $db->commit;
     $c->redirect_to("/op/$op");
   }
 };
@@ -175,12 +180,12 @@ under '/op/:op' => [op => qr/\d+/] => sub {
   my $c = shift;
   unless ($c->db->op_exists($c->param('op'))) {
     $c->render('op-not-found');
-    return undef;
+    return;
   }
 
   unless ($c->trusted_by_eve) {
     $c->render('trust');
-    return undef;
+    return;
   }
 
   return 1;
