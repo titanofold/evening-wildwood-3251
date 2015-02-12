@@ -1,7 +1,44 @@
--- Deploy harvestable_types_data
--- requires: harvestable_types
+-- 1 up
+CREATE SCHEMA ew;
 
-BEGIN;
+CREATE TABLE ew.pilots (
+       id   CHARACTER VARYING(10) PRIMARY KEY CHECK (id ~ '^[0-9]+$' AND id::bigint < 2100000000),
+       name TEXT                  NOT NULL UNIQUE
+);
+
+CREATE TABLE ew.harvestable_types (
+       id     CHARACTER VARYING(5) PRIMARY KEY NOT NULL CHECK (id ~ '^[0-9]{1,5}$'),
+       name   TEXT                 NOT NULL UNIQUE,
+       volume NUMERIC              NOT NULL CHECK (volume > 0)
+);
+
+CREATE TABLE ew.ops (
+       id      SERIAL                   PRIMARY KEY,
+       foreman CHARACTER VARYING(10)    REFERENCES ew.pilots (id),
+       start   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
+       finish  TIMESTAMP WITH TIME ZONE
+);
+
+CREATE TYPE pilot_role AS ENUM ('Miner', 'Defender', 'Hauler', 'Orca', 'Rorqual');
+
+CREATE TABLE ew.op_participants (
+       op_id    INTEGER               REFERENCES ew.ops (id),
+       pilot_id CHARACTER VARYING(10) REFERENCES ew.pilots (id),
+       role     pilot_role            NOT NULL,
+       share    NUMERIC(3,2)          NOT NULL,
+       paid     BOOLEAN               DEFAULT FALSE,
+       PRIMARY KEY (op_id, pilot_id)
+);
+
+CREATE TABLE ew.harvested (
+    op_id       INTEGER,
+    pilot_id    CHARACTER VARYING(10),
+    resource_id CHARACTER VARYING(5) REFERENCES ew.harvestable_types(id),
+    units       INTEGER              NOT NULL DEFAULT 0,
+    FOREIGN KEY (op_id, pilot_id) REFERENCES ew.op_participants (op_id, pilot_id)
+);
+
+CREATE INDEX harvested_op_id_idx ON ew.harvested (op_id);
 
 INSERT INTO ew.harvestable_types VALUES
 	('18', 'Plagioclase', 0.35),
@@ -92,4 +129,11 @@ INSERT INTO ew.harvestable_types VALUES
 
 COMMENT ON TABLE ew.harvestable_types IS 'Data ported from CCP/EVE Kronos 1.0 database';
 
-COMMIT;
+-- 1 down
+DROP TABLE ew.harvested;
+DROP TABLE ew.op_participants
+DROP TYPE pilot_role;
+DROP TABLE ew.ops;
+DROP TABLE ew.harvestable_types
+DROP TABLE ew.pilots;
+DROP SCHEMA ew;
