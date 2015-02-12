@@ -1,4 +1,32 @@
 % layout 'default';
-% title 'Welcome';
-<h1>Evening Wildwood</h1>
-<p>A foreman's best friend</p>
+% title 'EVEning Wildwood: An EVE Online Mining/Harvesting Operation Helper';
+<header>
+  <h1>EVEning Wildwood</h1>
+  A Mining Foreman's Best Friend
+</header>
+<p>EVEning Wildwood is a browser-based tool for EVE Online to aid
+  mining forepersons in tracking mining and/or harvesting
+  operations.</p>
+<p>While other tools reward miners for the amount of <em>time</em>
+  they spent in the operation or for the <em>value</em> of the resources
+  they've harvested, this tool rewards <em>skill and effort</em> they've
+  contributed to the group.</p>
+<div id="op-options">
+  <p><a href="/op/new">Start An Operation</a></p>
+  <div id='options-left'>
+	<form action="/" method="GET">
+	  <fieldset>
+		<label for="join-op">Join An Operation</label><br>
+		<input id="join-op" name="j" type="number">
+	  </fieldset>
+	</form>
+  </div>
+  <div id='options-right'>
+	<form action="/" method="GET">
+	  <fieldset>
+		<label for="lookup-up">Lookup An Operation</label><br>
+		<input id="lookup-op" name="l" type="number">
+	  </fieldset>
+	</form>
+  </div>
+</div>

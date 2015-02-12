@@ -1,4 +1,4 @@
-@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,700|Inconsolata&subset=latin,cyrillic,cyrillic-ext,greek-ext,greek,vietnamese,latin-ext);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700|Inconsolata&subset=latin,cyrillic,cyrillic-ext,greek-ext,greek,vietnamese,latin-ext);
 
 /* http://meyerweb.com/eric/tools/css/reset/ 
    v2.0 | 20110126
@@ -44,12 +44,14 @@ body {
 }
 
 p {margin-bottom:1rem}
-strong, em {color:#93a1a1}
+strong{font-weight:700}
+em {font-style:italic}
 
+header {margin:2rem 0}
 h1, h2, h3, h4, h5, h6 {color:#b58900}
 h1 {
     font-size:2rem;
-    margin:2rem 0;
+	line-height:2rem;
 }
 h2 {
     font-size:1.7rem;
@@ -97,7 +99,14 @@ td:last-child {text-align:right}
 
 .error {color:#dc322f}
 
+footer {margin-top:2rem}
 footer p {
     color:#586e75;
     font-size: .8rem;
 }
+
+#op-options {width:50%;margin:0 auto;}
+#op-options p {text-align:center}
+#options-left {float:left; width:45%;}
+#options-right {margin-left:55%; width: 45%}
+
