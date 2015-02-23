@@ -13,8 +13,7 @@ helper pg =>
 ####################
 # Database Helpers #
 ####################
-helper 'db.foreman_for' => sub {
-  my ($c, $op) = @_;
+helper 'db.foreman_for' => sub ($c, $op) {
   $c->pg->db->query(
     q|
     SELECT ew.pilots.name
@@ -25,8 +24,7 @@ helper 'db.foreman_for' => sub {
 };
 
 # List pilots for the given op. Returns array ref
-helper 'db.pilots_for' => sub {
-  my ($c, $op) = @_;
+helper 'db.pilots_for' => sub ($c, $op) {
   $c->pg->db->query(
     q|
       SELECT ew.pilots.name, ew.pilots.id
@@ -37,8 +35,7 @@ helper 'db.pilots_for' => sub {
 };
 
 # Returns 1 if found, else 0
-helper 'db.op_exists' => sub {
-  my ($c, $op) = @_;
+helper 'db.op_exists' => sub ($c, $op) {
   $c->pg->db->query(
     q|
     SELECT COUNT(*) FROM ew.ops WHERE id = ?
@@ -46,8 +43,7 @@ helper 'db.op_exists' => sub {
   );
 };
 
-helper 'db.harvested' => sub {
-  my ($c, $op) = @_;
+helper 'db.harvested' => sub ($c, $op) {
   $c->pg->db->query(
     q|    SELECT ew.pilots.name AS pilot,
                      ew.harvestable_types.name AS resource,
@@ -60,12 +56,10 @@ helper 'db.harvested' => sub {
   )->array;
 };
 
-sub verify_pilot {
-  my ($id, $name) = @_;
-
+sub verify_pilot ($id, $name) {
   return 0 unless $id and $name;
 
-  state $pg = Mojo::Pg->new($ENV{DATABASE_URL});
+  state $pg = Mojo::Pg->new($ENV{DATABASE_URL} || $cfg->{database_url});
   my $db = $pg->db;
 
   return 1
@@ -103,17 +97,16 @@ sub verify_pilot {
 ################
 # Data Helpers #
 ################
-helper get_header_value => sub { return shift->req->headers->header(shift) };
+helper get_header_value =>
+  sub ($c, $h) { return $c->req->headers->header($h) };
 
-helper trusted_by_eve => sub {
-  my $c       = shift;
+helper trusted_by_eve => sub ($c) {
   my $trusted = $c->get_header_value('eve_trusted');
   return $trusted && $trusted eq "Yes" ? 1 : 0;
 };
 
-helper format_number => sub {
+helper format_number => sub ($c, $n) {
   use Number::Format;
-  my ($c, $n) = @_;
   state $f = Number::Format->new(-thousands_sep => ',', -decimal_point => '.');
   return $f->format_number($n);
 };
@@ -197,15 +190,12 @@ get '/callback' => sub ($c) {
   else              { $c->render('bad-pilot') }
 };
 
-get '/test' => sub {
-  my $c = shift;
+get '/test' => sub ($c) {
   $c->stash(headers => $c->req->headers);
   $c->render;
 };
 
-get '/op/new' => sub {
-  my $c = shift;
-
+get '/op/new' => sub ($c) {
   my $pilot_id   = $c->get_header_value('eve_charid');
   my $pilot_name = $c->get_header_value('eve_charname');
   if (not $c->trusted_by_eve) {
@@ -225,8 +215,7 @@ get '/op/new' => sub {
   }
 };
 
-under '/op/:op' => [op => qr/\d+/] => sub {
-  my $c = shift;
+under '/op/:op' => [op => qr/\d+/] => sub ($c) {
   unless ($c->db->op_exists($c->param('op'))) {
     $c->render('op-not-found');
     return;
@@ -240,30 +229,20 @@ under '/op/:op' => [op => qr/\d+/] => sub {
   return 1;
 };
 
-get '/' => sub {
-  my $c = shift;
-  $c->render('op-index');
-};
+get '/' => sub ($c) { $c->render('op-index') };
 
 get '/harvest-table' => 'harvest-table';
 get '/loot-table';
 
-post '/add-harvest' => sub {
-  my $c = shift;
-  $c->redirect_to('/');
-};
+post '/add-harvest' => sub ($c) { $c->redirect_to('/') };
 
-get '/join' => sub {
-  my $c          = shift;
+get '/join' => sub ($c) {
   my $pilot_id   = $c->get_header_value('eve_charid');
   my $pilot_name = $c->get_header_value('eve_charname');
   $c->render('bad-pilot') unless verify_pilot($pilot_id, $pilot_name);
   $c->redirect_to('/');
 };
 
-get '/finish' => sub {
-  my $c = shift;
-  $c->redirect_to('/');
-};
+get '/finish' => sub ($c) { $c->redirect_to('/') };
 
 app->start;
