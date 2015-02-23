@@ -8,7 +8,7 @@ use Mojo::Util qw(b64_encode);
 my $cfg = plugin 'Config';
 
 helper pg =>
-  sub { state $pg = Mojo::Pg->new($ENV{DATABASE_URL} || $cfg->{DATABASE_URL}) };
+  sub { state $pg = Mojo::Pg->new($ENV{DATABASE_URL} || $cfg->{database_url}) };
 
 ####################
 # Database Helpers #
