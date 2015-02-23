@@ -1,11 +1,14 @@
 #!/usr/bin/env perl
 use v5.20;
+use experimental 'signatures';
 use Mojolicious::Lite;
 use Mojo::Pg;
+use Mojo::Util qw(b64_encode);
 
-use experimental 'signatures';
+my $cfg = plugin 'Config';
 
-helper pg => sub { state $pg = Mojo::Pg->new($ENV{DATABASE_URL}) };
+helper pg =>
+  sub { state $pg = Mojo::Pg->new($ENV{DATABASE_URL} || $cfg->{DATABASE_URL}) };
 
 ####################
 # Database Helpers #
@@ -144,8 +147,54 @@ get '/db_setup' => sub ($c) {
   }
   else {
     $c->render(
-      text => 'Database migration failed. Check STDERR for reasons why.');
+      code => 500,
+      text => 'Database migration failed. Check STDERR for reasons why.'
+    );
   }
+};
+
+get '/login' => sub ($c) {
+  my $tokens = $c->pg->db->query(
+    'SELECT gen_random_uuid() AS session, gen_random_uuid() AS state')->hash;
+
+  $c->session->{token} = $tokens->{session};
+
+  my $eve_url
+    = Mojo::URL->new('https://login.eveonline.com/oauth/authorize')->query(
+    client_id     => '',
+    redirect_uri  => $c->url_for('/callback')->to_abs,
+    response_type => 'code',
+    scope         => '',
+    state         => $tokens->{state}
+    );
+  $c->redirect_to($eve_url);
+};
+
+get '/callback' => sub ($c) {
+  my $result = $c->pg->db->query(
+    q|SELECT requested_uri
+                        FROM login_mgmt
+                        WHERE session_token = ? AND state_token = ?|,
+    $c->session->{token}, $c->param('state')
+  )->hash;
+
+  my $auth_key = b64_encode $cfg->{client_id} . ':' . $cfg->{client_secret};
+
+  my $good_auth;
+
+  if ($ENV{EWTESTING}) {
+    $good_auth = $ENV{EWAUTHTEST};
+  }
+  else {
+    my $ua = Mojo::UserAgent->new;
+
+    $ua->post('https://login.eveonline.com/oauth/token' =>
+        {Authorization => "Basic $auth_key"} => form =>
+        {grant_type => 'authorization_code', code => $c->param('code')});
+  }
+
+  if   ($good_auth) { $c->redirect_to($result->{requested_uri}) }
+  else              { $c->render('bad-pilot') }
 };
 
 get '/test' => sub {

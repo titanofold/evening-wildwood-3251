@@ -137,3 +137,9 @@ DROP TABLE ew.ops;
 DROP TABLE ew.harvestable_types
 DROP TABLE ew.pilots;
 DROP SCHEMA ew;
+
+-- 2 up
+CREATE EXTENSION pgcrypto;
+
+-- 2 down
+DROP EXTENSION pgcrypto;
