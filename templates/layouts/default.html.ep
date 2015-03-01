@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+	%= tag 'base', href => $config->{base_url}
     <meta name="viewport" content="initial-scale=1">
     <title><%= title %></title>
     %= stylesheet '/c.css'

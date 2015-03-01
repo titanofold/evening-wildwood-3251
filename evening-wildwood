@@ -5,10 +5,11 @@ use Mojolicious::Lite;
 use Mojo::Pg;
 use Mojo::Util qw(b64_encode);
 
-my $cfg = plugin 'Config';
+my $config = plugin 'Config';
 
-helper pg =>
-  sub { state $pg = Mojo::Pg->new($ENV{DATABASE_URL} || $cfg->{database_url}) };
+helper pg => sub {
+  state $pg = Mojo::Pg->new($ENV{DATABASE_URL} || $config->{database_url});
+};
 
 ####################
 # Database Helpers #
@@ -59,7 +60,7 @@ helper 'db.harvested' => sub ($c, $op) {
 sub verify_pilot ($id, $name) {
   return 0 unless $id and $name;
 
-  state $pg = Mojo::Pg->new($ENV{DATABASE_URL} || $cfg->{database_url});
+  state $pg = Mojo::Pg->new($ENV{DATABASE_URL} || $config->{database_url});
   my $db = $pg->db;
 
   return 1
@@ -171,7 +172,8 @@ get '/callback' => sub ($c) {
     $c->session->{token}, $c->param('state')
   )->hash;
 
-  my $auth_key = b64_encode $cfg->{client_id} . ':' . $cfg->{client_secret};
+  my $auth_key
+    = b64_encode $config->{client_id} . ':' . $config->{client_secret};
 
   my $good_auth;
 
