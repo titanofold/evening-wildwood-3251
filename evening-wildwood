@@ -245,4 +245,18 @@ get '/join' => sub ($c) {
 
 get '/finish' => sub ($c) { $c->redirect_to('/') };
 
+# Copied from:
+# https://github.com/kraih/mojo/wiki/Apache-deployment
+app->hook(
+  'before_dispatch' => sub {
+    my $self = shift;
+    if ($self->req->headers->header('X-Forwarded-Host')) {
+
+      #Proxy Path setting
+      my $path = shift @{$self->req->url->path->parts};
+      push @{$self->req->url->base->path->parts}, $path;
+    }
+  }
+);
+
 app->start;
