@@ -14,7 +14,7 @@
 <div id="op-options">
   <p><a href="/op/new">Start An Operation</a></p>
   <div id='options-left'>
-	<form action="/" method="GET">
+	<form>
 	  <fieldset>
 		<label for="join-op">Join An Operation</label><br>
 		<input id="join-op" name="j" type="number">
@@ -22,7 +22,7 @@
 	</form>
   </div>
   <div id='options-right'>
-	<form action="/" method="GET">
+	<form>
 	  <fieldset>
 		<label for="lookup-up">Lookup An Operation</label><br>
 		<input id="lookup-op" name="l" type="number">
